@@ -17,6 +17,27 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
+    signingConfigs {
+        create("release") {
+            val keyStorePath = System.getenv("POLYTECH_KEYSTORE_PATH")
+            if (!keyStorePath.isNullOrBlank()) {
+                storeFile = file(keyStorePath)
+                storePassword = System.getenv("POLYTECH_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("POLYTECH_KEY_ALIAS") ?: "polytech"
+                keyPassword = System.getenv("POLYTECH_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+
     buildFeatures { compose = true }
 
     compileOptions {

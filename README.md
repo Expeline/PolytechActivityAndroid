@@ -33,6 +33,8 @@
 
 Debug APK появится в `app/build/outputs/apk/debug/`. Каталоги сборки, локальные настройки IDE и ключи подписи исключены из Git.
 
+Для подписанной release-сборки задайте `POLYTECH_KEYSTORE_PATH`, `POLYTECH_KEYSTORE_PASSWORD`, `POLYTECH_KEY_ALIAS` и `POLYTECH_KEY_PASSWORD`, затем выполните `./gradlew assembleRelease`. Ключи и пароли нельзя добавлять в репозиторий.
+
 ## Конфиденциальность
 
 Приложение обращается только к публичному API СПбПУ. Аналитики, рекламы и сторонних SDK нет. Настройки и расписание хранятся локально на устройстве.

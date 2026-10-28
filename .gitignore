@@ -10,4 +10,5 @@ local.properties
 captures/
 externalNativeBuild/
 .cxx/
+gradle/gradle-daemon-jvm.properties
 

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Политех</string>
+    <string name="widget_description">Текущая пара и таймер до её окончания</string>
+</resources>
+

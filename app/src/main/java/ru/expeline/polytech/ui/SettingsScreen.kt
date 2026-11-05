@@ -32,6 +32,20 @@ import ru.expeline.polytech.data.*
     LazyColumn(contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(24.dp), modifier = Modifier.fillMaxSize()) {
         item { Row(verticalAlignment = Alignment.CenterVertically) { IconButton(back) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Назад") }; Text("Настройки", fontSize = 29.sp, fontWeight = FontWeight.Medium) } }
         item { SettingsSection("Учёба") { Row(Modifier.fillMaxWidth().clickable(onClick = groups).padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(ui.data.group.name, fontWeight = FontWeight.SemiBold); Text(ui.data.group.faculty.name, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }; Icon(Icons.Rounded.ChevronRight, null) } } }
+        item { SettingsSection("Задания и изменения") {
+            var name by remember { mutableStateOf(ui.study.settings.displayName) }
+            var address by remember { mutableStateOf(ui.study.settings.serverAddress) }
+            OutlinedTextField(name, { name = it.take(40) }, Modifier.fillMaxWidth(), label = { Text("Ваше имя в группе") }, singleLine = true)
+            OutlinedTextField(address, { address = it }, Modifier.fillMaxWidth(), label = { Text("Сервер группы") }, placeholder = { Text("http://192.168.1.10:8080") }, singleLine = true)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f)) { ServerLine(ui) }
+                FilledTonalButton({ model.studySettings { it.copy(displayName = name.trim(), serverAddress = address.trim()) } }) { Text("Подключить") }
+            }
+            (ui.server as? ServerStatus.Offline)?.let { Text(it.reason, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            ToggleSetting("Уведомлять об изменениях", ui.study.settings.notifyChanges, "Переносы, отмены и новые пары на ближайшую неделю.") { v -> model.studySettings { it.copy(notifyChanges = v) } }
+            ToggleSetting("Напоминать о сроках", ui.study.settings.notifyDeadlines, "За день и за 3 часа до срока невыполненного задания.") { v -> model.studySettings { it.copy(notifyDeadlines = v) } }
+            Text("Изменения расписания приложение находит само при каждом обновлении. Сервер добавляет общие задания группы и проверяет расписание каждые 15 минут. Задания открыты всем, кто выбрал эту группу.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } }
         item { SettingsSection("Оформление") {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { AppTheme.entries.forEach { theme -> FilterChip(selected = prefs.theme == theme, onClick = { model.preferences { it.copy(theme = theme) } }, label = { Text(when(theme) { AppTheme.SYSTEM -> "Система"; AppTheme.LIGHT -> "Светлая"; AppTheme.DARK -> "Тёмная" }) }, modifier = Modifier.weight(1f)) } }
             Text("Акцентный цвет", fontWeight = FontWeight.Medium)

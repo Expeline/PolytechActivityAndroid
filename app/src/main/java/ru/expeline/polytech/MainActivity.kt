@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= 33) notifications.launch(Manifest.permission.POST_NOTIFICATIONS)
         setContent {
             val app = application as PolytechApplication
-            val model: ScheduleViewModel = viewModel(factory = ScheduleViewModelFactory(app.repository, app))
+            val model: ScheduleViewModel = viewModel(factory = ScheduleViewModelFactory(app.repository, app.study, app))
             PolytechApp(model)
         }
     }

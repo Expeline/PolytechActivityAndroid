@@ -12,7 +12,12 @@ class RefreshWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     override suspend fun doWork(): Result {
         val app = applicationContext as PolytechApplication
         return runCatching {
-            val errors = app.repository.refresh(StudyClock.today())
+            val result = app.repository.refresh(StudyClock.today())
+            val errors = result.errors
+            app.study.recordLocal(result.groupId, result.changes)
+            app.study.select(result.groupId)
+            app.study.sync()
+            app.study.stopLive()
             val data = app.repository.state.value
             LessonNotification.sync(app, app.repository.activeOrNext(value = data), data)
             ScheduleWidget.updateAll(app)

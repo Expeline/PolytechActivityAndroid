@@ -7,11 +7,13 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import ru.expeline.polytech.data.ScheduleRepository
+import ru.expeline.polytech.data.StudyRepository
 import ru.expeline.polytech.work.RefreshWorker
 import java.util.concurrent.TimeUnit
 
 class PolytechApplication : Application() {
     val repository by lazy { ScheduleRepository(this) }
+    val study by lazy { StudyRepository(this) }
     override fun onCreate() {
         super.onCreate()
         val request = PeriodicWorkRequestBuilder<RefreshWorker>(6, TimeUnit.HOURS)

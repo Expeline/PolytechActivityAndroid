@@ -42,19 +42,35 @@ class ScheduleRepository(context: Context) {
             ?: eligible.filter { it.start > now }.minByOrNull { it.start }
     }
 
-    suspend fun refresh(selectedDate: LocalDate): List<String> = coroutineScope {
+    /** Errors per failed week and schedule changes found by comparing with the cached copy. */
+    data class RefreshResult(val errors: List<String>, val groupId: Int, val changes: List<ScheduleChange>)
+
+    suspend fun refresh(selectedDate: LocalDate): RefreshResult = coroutineScope {
         val snapshot = state.value
         val dates = ((0 until snapshot.preferences.weeksAhead).map { StudyClock.monday(StudyClock.today().plusWeeks(it.toLong())) } + StudyClock.monday(selectedDate)).distinct()
         val results = dates.map { date -> async { date to runCatching { fetchWeek(snapshot.group.id, date) } } }.awaitAll()
         val errors = results.mapNotNull { it.second.exceptionOrNull()?.localizedMessage }
         val successes = results.mapNotNull { (date, result) -> result.getOrNull()?.let { date to it } }
+        val changes = mutableListOf<ScheduleChange>()
+        val now = Instant.now()
         if (successes.isNotEmpty()) update { old ->
+            if (old.group.id != snapshot.group.id) return@update old // group switched meanwhile
             val weeks = old.weeks.toMutableMap()
-            successes.forEach { (date, response) -> weeks[weekKey(date, snapshot.group.id)] = CachedWeek(response, Instant.now()) }
+            successes.forEach { (date, response) ->
+                val key = weekKey(date, snapshot.group.id)
+                // PolyChanges: compare with the copy we had before replacing it.
+                old.weeks[key]?.let { previous -> changes += ScheduleDiff.changes(previous.response.lessons(), response.lessons(), now, now) }
+                weeks[key] = CachedWeek(response, now)
+            }
             old.copy(group = successes.firstOrNull { it.first == StudyClock.monday(selectedDate) }?.second?.group ?: old.group, weeks = weeks)
         }
-        errors
+        RefreshResult(errors, snapshot.group.id, changes)
     }
+
+    /** Subjects seen in the cached schedule of the current group. */
+    fun subjects(value: PersistedState = state.value) = allLessons(value).map { it.subject }.distinct().sorted()
+    fun nextLesson(subject: String, after: Instant = Instant.now(), value: PersistedState = state.value) =
+        allLessons(value).firstOrNull { it.subject == subject && it.start > after }
 
     suspend fun search(query: String): List<StudyGroup> {
         StudyGroup.ids(query)?.let { (faculty, group) ->

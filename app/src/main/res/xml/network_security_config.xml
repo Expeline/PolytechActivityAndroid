@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The group server usually runs on a laptop in the same Wi-Fi without HTTPS.
+     Plain HTTP is allowed only for user-entered server addresses; the RUZ API is always HTTPS.
+     Once the server runs on a public host with HTTPS, cleartext can be switched off here. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors><certificates src="system" /></trust-anchors>
+    </base-config>
+</network-security-config>

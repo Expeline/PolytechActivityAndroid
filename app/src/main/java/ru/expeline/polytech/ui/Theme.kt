@@ -21,7 +21,6 @@ fun StudyAccent.color() = when (this) {
     StudyAccent.YELLOW -> Color(0xFF9B7B16); StudyAccent.TEAL -> Color(0xFF218A86); StudyAccent.GRAPHITE -> Color(0xFF62676E)
 }
 fun StudyAccent.deep() = if (this == StudyAccent.GREEN) Color(0xFF0E402E) else color().copy(alpha = 0.88f)
-fun StudyAccent.highlight() = if (this == StudyAccent.GREEN) Color(0xFFC2EF8A) else Color.White.copy(alpha = 0.92f)
 
 /** Material 3 Expressive: springy motion everywhere, the app's own accent colors. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
